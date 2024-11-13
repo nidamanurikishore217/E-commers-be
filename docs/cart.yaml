@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce Cart API
+  version: "1.0"
+  description: API documentation for managing shopping carts.
+security:
+  - bearerAuth: []  # Apply Bearer token authorization globally
+paths:
+  /api/cart:
+    get:
+      summary: Retrieve cart by user ID
+      tags: [Cart]
+      security:
+        - bearerAuth: []  # Require authorization for this endpoint
+      responses:
+        200:
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        401:
+          description: Unauthorized
+        404:
+          description: Cart not found
+    post:
+      summary: Add a new cart
+      tags: [Cart]
+      security:
+        - bearerAuth: []  # Require authorization for this endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cart'
+      responses:
+        201:
+          description: Cart added successfully
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+  /api/cart/{id}:
+    get:
+      summary: Retrieve a cart by ID
+      tags: [Cart]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The cart ID
+      responses:
+        200:
+          description: Cart data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        404:
+          description: Cart not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Cart:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The ID of the user owning the cart (ObjectId)
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+                description: The ID of the product (ObjectId)
+              quantity:
+                type: integer
+                description: The quantity of the product in the cart
+                default: 1
+      required:
+        - user
+        - products

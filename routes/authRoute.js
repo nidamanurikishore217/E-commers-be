@@ -5,13 +5,5 @@ const router = Router();
 
 
 router.post('/login', authController.login);
-
-router.post('/register', authController.register)
-
-router.get('/profile', customMiddleware, authController.profile)
-
-router.get('/users', authController.users)
-
-router.put('/users', authController.users)
-
+// router.post('/register', authController.register)
 module.exports = router

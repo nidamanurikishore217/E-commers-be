@@ -1,51 +1,25 @@
-const products = require("../models/productModel")
+const Product = require("../models/Product")
 
 class ProductServices {
-   async getProducts(){
-    return products.map(product => ({
-        name: product.name,
-        description: product.description,
-    }));
-}
-
-async getProductById(id){
-      const product = products.find(p => p.id === id)
-      return product ? {
-        name:product.name,
-        description:product.description
-      }:null
-    };
-
-
-    async addProduct(productData) {
-        const newProduct = {
-            id: (products.length + 1).toString(),
-            ...productData
-        };
-        products.push(newProduct);
-        return newProduct;
+    async getAllProducts() {
+        return await Product.find();
     }
 
-    async updateProductById(id, updateData) {
-        console.log("Received productId in service:", id); // Debug line
-
-        const productIndex = products.findIndex((p) => p.id === id);
-
-        if (productIndex !== -1) {
-            products[productIndex] = { ...products[productIndex], ...updateData };
-            return products[productIndex];
-        }
-
-        return null; // Return null if not found
+    async getProductById(productId) {
+        return await Product.findById(productId);
     }
 
-    deleteProductById (id) {
-        const productIndex = products.findIndex(p => p.id === id);
-        if (productIndex !== -1) {
-            const deletedProduct = products.splice(productIndex, 1);
-            return deletedProduct[0];
-        }
-        return null;
+    async createProduct(productData) {
+        const product = new Product(productData);
+        return await product.save();
+    }
+
+    async updateProduct(productId, productData) {
+        return await Product.findByIdAndUpdate(productId, productData, { new: true });
+    }
+
+    async deleteProduct(productId) {
+        return await Product.findByIdAndDelete(productId);
     }
 
 }

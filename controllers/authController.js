@@ -1,62 +1,36 @@
 const authServices = require('../services/authServices');
+const JWTHelper = require('../utils/JWTHelper')
+
 
 class AuthController {
-   
-    async login (req,res){
-        try{
-            const { email, password} = req.body;
-            const user = await authServices.login(email,password);
-            res.status(200).json({ user });
-    
-        }
-        catch(error){
-            res.status(400).json({message:error.message})
-        }
-    }
-
-    async register(req, res) {
+    async login(req, res) {
         try {
-            const {email, password}=req.body
-            const user = await authServices.register(email,password);
-            res.status(201).json({ user });
-        } catch (error) {
-            res.status(400).json({ message: error.message });
-        }
-    }
+            const { password } = req.body;
+            const user = await authServices.login(req.body.email);
 
-    async profile(req,res){
-        try{
-            const{email, password} =req.body
-            const user =await authServices.profile(email,password);
-            res.status(201).json({user})
-        }
-        catch(error){
-            res.status(400).json({message:error.message})
-        }
-    }
-
-
-    async users(req, res) {
-        try {
-            const userId = req.params.id;
-            const { email, password } = req.body;
-                const user = await authServices.users.find(email, password);
-    
-            if (user && user.id === userId) {
-                res.status(200).json({ user });
-            } else {
-                res.status(404).json({ message: "User not found" });
+            if (!user) {
+                return res.status(400).json({ message: 'Invalid credentials' });
             }
-        } catch (error) {
-            res.status(400).json({ message: error.message });
+
+            // Check if password is correct using the comparePassword method
+            const isMatch = await user.comparePassword(password);
+            if (!isMatch) {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
+
+            const { _id: userId, name, email, isAdmin } = user;
+            const formattedUser = { userId, name, email, isAdmin }
+            // Generate a JWT token
+            const token = JWTHelper.generateToken(formattedUser);
+
+            res.status(200).json({ ...formattedUser, token });
+
+        }
+        catch (error) {
+            res.status(400).json({ message: error.message })
         }
     }
-    
 
-
-
-
-    
 }
 
 module.exports = new AuthController()

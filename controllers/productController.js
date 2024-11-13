@@ -1,59 +1,61 @@
-const productServices = require("../services/productServices")
+const productService = require("../services/productServices")
 
 class ProductController {
 
-    async getProducts(req, res) {   
-        const products = await productServices.getProducts();
-        res.json({ products });
+    async getAllProducts(req, res) {   
+        try{
+            const products = await productService.getAllProducts();
+            res.json(products)
+        }
+        catch(error){
+            res.status(500).json({message:error.message})
+        } 
     }
 
-    async getProduct(req,res){
-          const productId =req.params.id;
-          const product = await productServices.getProductById(productId)
-
-          if(product){
-            res.json(product)
-          }
-          else{
-            res.status(404).json({message:"product not found"})
-          }
+    async getProductById(req,res){
+             try{
+                const product = await productService.getProductById(req.params.id);
+                  if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+            res.json(product);
+             }
+            catch(error){
+                 res.status(500).json({message:error.message})
+            }
+          
     }
 
-    async addProduct(req, res) {
+    async createProduct(req, res) {
         try {
-            const productData = req.body;
-            const newProduct = await productServices.addProduct(productData);
-            res.status(201).json(newProduct);
+            const product = await productService.createProduct(req.body);
+            res.status(201).json(product);
         } catch (error) {
-            res.status(500).json({ error: 'Error adding product' });
+            res.status(400).json({ message: error.message });
         }
     }
 
     async updateProduct(req, res) {
-        console.log("Received params:", req.params); // Log the entire params object
-        
-        const productId = req.params.id;
-        const updateData = req.body;
-
-        // console.log("Received productId in controller:", productId); // Debug line
-
-        const updatedProduct = await productServices.updateProductById(productId, updateData);
-
-        if (updatedProduct) {
-            return res.json(updatedProduct);
-        } else {
-            return res.status(404).json({ message: 'Product not found' });
+        try {
+            const product = await productService.updateProduct(req.params.id, req.body);
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+            res.json(product);
+        } catch (error) {
+            res.status(400).json({ message: error.message });
         }
     }
 
-   async deleteProduct (req, res){
-        const productId = req.params.id;
-        const deletedProduct =  await productServices.deleteProductById(productId);
-
-        if (deletedProduct) {
-            res.json({ message: 'Product deleted successfully', product: deletedProduct });
-        } else {
-            res.status(404).json({ message: 'Product not found' });
+    async deleteProduct(req, res) {
+        try {
+            const product = await productService.deleteProduct(req.params.id);
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+            res.json({ message: 'Product deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
     }
 }
